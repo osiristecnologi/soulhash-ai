@@ -7,7 +7,7 @@ body{
   text-align:center;
   color:white;
 
-  background:url("bg.jpg") no-repeat center center;
+  background:url("bg.jpg") no-repeat center center 65%;
   background-size:cover;
 }
 
