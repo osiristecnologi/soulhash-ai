@@ -1,107 +1,431 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Soul Hash - Crystal Rotation</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background: #0a0a0f;
-            overflow: hidden;
-        }
-
-        .card-container {
-            position: relative;
-            width: 320px;
-            height: 450px;
-        }
-
-        .card-bg {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border-radius: 12px;
-            overflow: hidden;
-        }
-
-        .card-bg img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        /* Overlay to mask the original crystal area */
-        .crystal-layer {
-            position: absolute;
-            top: 22%;
-            left: 18%;
-            width: 64%;
-            height: 50%;
-            animation: slowRotate 8s linear infinite;
-            transform-origin: center center;
-        }
-
-        .crystal-layer img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            clip-path: ellipse(48% 50% at 50% 50%);
-        }
-
-        @keyframes slowRotate {
-            0% {
-                transform: rotateY(0deg);
-            }
-            100% {
-                transform: rotateY(360deg);
-            }
-        }
-
-        /* Glow pulse effect */
-        .glow-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border-radius: 12px;
-            pointer-events: none;
-            animation: glowPulse 4s ease-in-out infinite;
-            box-shadow: inset 0 0 60px rgba(128, 0, 255, 0.1);
-        }
-
-        @keyframes glowPulse {
-            0%, 100% {
-                box-shadow: inset 0 0 30px rgba(128, 0, 255, 0.05), 0 0 20px rgba(128, 0, 255, 0.1);
-            }
-            50% {
-                box-shadow: inset 0 0 60px rgba(128, 0, 255, 0.15), 0 0 40px rgba(128, 0, 255, 0.2);
-            }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Music House | Analisador Musical</title>
+  <style>
+    :root {
+      --bg: #0f1115;
+      --surface: #1a1d24;
+      --border: #2a2f3a;
+      --text: #e4e6eb;
+      --text-muted: #8b92a0;
+      --accent: #6c5ce7;
+      --accent-glow: rgba(108, 92, 231, 0.4);
+      --success: #00b894;
+      --warning: #fdcb6e;
+      --radius: 12px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      line-height: 1.5;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    .container {
+      width: 100%;
+      max-width: 900px;
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 24px;
+      border: 1px solid var(--border);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    h1 { font-size: 1.8rem; font-weight: 700; letter-spacing: -0.5px; }
+    h1 span { color: var(--accent); }
+    .controls { display: flex; gap: 12px; flex-wrap: wrap; }
+    button {
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    button:hover { filter: brightness(1.1); transform: translateY(-1px); }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    .secondary { background: transparent; border: 1px solid var(--border); color: var(--text-muted); }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 20px; }
+    .card {
+      background: rgba(255,255,255,0.03);
+      padding: 14px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+    }
+    .card h3 { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1px; }
+    .card .value { font-size: 1.6rem; font-weight: 700; color: var(--success); }
+    .card .value.chord { color: var(--accent); }
+    .card .value.bpm { color: var(--warning); }
+    .visualizer {
+      width: 100%;
+      height: 160px;
+      background: #000;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    canvas { display: block; width: 100%; height: 100%; }
+    .meter {
+      height: 6px;
+      background: var(--border);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+    .meter-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--success));
+      width: 0%;
+      transition: width 0.1s;
+    }
+    .history {
+      max-height: 120px;
+      overflow-y: auto;
+      background: rgba(0,0,0,0.2);
+      padding: 10px;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 0.85rem;
+    }
+    .history div { padding: 4px 0; border-bottom: 1px solid var(--border); }
+    .status { font-size: 0.8rem; color: var(--text-muted); margin-top: 10px; text-align: center; }
+    @media (max-width: 600px) {
+      .grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
 </head>
 <body>
-    <div class="card-container">
-        <div class="card-bg">
-            <img src="crystal.png" alt="Soul Hash Card">
-        </div>
-        <div class="crystal-layer">
-            <img src="crystal.png" alt="Crystal rotating">
-        </div>
-        <div class="glow-overlay"></div>
+  <div class="container">
+    <header>
+      <h1>🎵 Music <span>House</span></h1>
+      <div class="controls">
+        <button id="startBtn">🎤 Iniciar Microfone</button>
+        <button id="exportBtn" class="secondary" disabled>📥 Exportar JSON</button>
+      </div>
+    </header>
+
+    <div class="grid">
+      <div class="card"><h3>Nota Atual</h3><div class="value" id="noteVal">--</div></div>
+      <div class="card"><h3>Frequência</h3><div class="value" id="freqVal">-- Hz</div></div>
+      <div class="card"><h3>Acorde Provável</h3><div class="value chord" id="chordVal">--</div></div>
+      <div class="card"><h3>Tonalidade</h3><div class="value" id="keyVal">--</div></div>
+      <div class="card"><h3>BPM Estimado</h3><div class="value bpm" id="bpmVal">--</div></div>
+      <div class="card"><h3>Confiança</h3><div class="value" id="confVal">0%</div></div>
     </div>
+
+    <div class="meter"><div class="meter-fill" id="volMeter"></div></div>
+    <div class="visualizer"><canvas id="canvas"></canvas></div>
+    <div class="history" id="history"><div>Histórico de notas aparecerá aqui...</div></div>
+    <div class="status" id="status">Aguardando início da análise...</div>
+  </div>
+
+<script>
+/**
+ * MUSIC HOUSE - MOTOR DE ANÁLISE MUSICAL
+ * Implementação pura em JavaScript/Web Audio API
+ * Técnicas: Autocorrelação (YIN-like), Histograma de Classes de Pitch,
+ * Perfis de Krumhansl, Detecção de Onset para BPM
+ */
+
+const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+const CHORD_TEMPLATES = {
+  'M': [1,0,1,0,1,1,0,1,0,1,0,1], 'm': [1,0,1,1,0,1,0,1,1,0,1,0],
+  '7': [1,0,1,0,1,1,0,1,0,1,1,0], 'maj7': [1,0,1,0,1,1,0,1,0,1,0,1],
+  'm7': [1,0,1,1,0,1,0,1,1,0,1,0] // Simplificado
+};
+const KRUMHANSL_MAJOR = [6.35,2.23,3.48,2.33,4.38,4.09,2.52,5.19,2.39,3.66,2.29,2.88];
+const KRUMHANSL_MINOR = [6.33,2.68,3.52,5.38,2.60,3.53,2.54,4.75,3.98,2.69,3.34,3.17];
+
+let audioCtx, analyser, source, rafId;
+let bufferLength, dataArrayFloat, dataArrayByte;
+let isRunning = false;
+let noteHistory = [];
+let pitchClassBuffer = new Float32Array(12);
+let onsetTimes = [];
+let lastOnset = 0;
+let currentFreq = 0;
+let frameCount = 0;
+
+const UI = {
+  note: document.getElementById('noteVal'),
+  freq: document.getElementById('freqVal'),
+  chord: document.getElementById('chordVal'),
+  key: document.getElementById('keyVal'),
+  bpm: document.getElementById('bpmVal'),
+  conf: document.getElementById('confVal'),
+  meter: document.getElementById('volMeter'),
+  canvas: document.getElementById('canvas'),
+  history: document.getElementById('history'),
+  status: document.getElementById('status'),
+  startBtn: document.getElementById('startBtn'),
+  exportBtn: document.getElementById('exportBtn')
+};
+
+const ctx = UI.canvas.getContext('2d');
+function resizeCanvas() {
+  UI.canvas.width = UI.canvas.offsetWidth;
+  UI.canvas.height = UI.canvas.offsetHeight;
+}
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+
+// --- DSP CORE ---
+
+// Autocorrelação para detecção de pitch (otimizada)
+function autoCorrelate(buf, sampleRate) {
+  let SIZE = buf.length;
+  let rms = 0;
+  for (let i = 0; i < SIZE; i++) rms += buf[i] * buf[i];
+  rms = Math.sqrt(rms / SIZE);
+  if (rms < 0.02) return { freq: 0, conf: 0 }; // Silêncio
+
+  let r1 = 0, r2 = SIZE - 1, thres = 0.2;
+  for (let i = 0; i < SIZE / 2; i++) if (Math.abs(buf[i]) < thres) { r1 = i; break; }
+  for (let i = 1; i < SIZE / 2; i++) if (Math.abs(buf[SIZE - i]) < thres) { r2 = SIZE - i; break; }
+
+  buf = buf.slice(r1, r2);
+  SIZE = buf.length;
+
+  let c = new Array(SIZE).fill(0);
+  for (let i = 0; i < SIZE; i++) {
+    let sum = 0;
+    for (let j = 0; j < SIZE - i; j++) sum += buf[j] * buf[j + i];
+    c[i] = sum;
+  }
+
+  let d = 0; while (c[d] > c[d + 1] && d < SIZE / 2) d++;
+  let maxval = -1, maxpos = -1;
+  for (let i = d; i < SIZE; i++) {
+    if (c[i] > maxval) { maxval = c[i]; maxpos = i; }
+  }
+  let T0 = maxpos;
+
+  // Interpolação parabólica para sub-sample accuracy
+  if (T0 > 0 && T0 < SIZE - 1) {
+    let x1 = c[T0 - 1], x2 = c[T0], x3 = c[T0 + 1];
+    let a = (x1 + x3 - 2 * x2) / 2;
+    let b = (x3 - x1) / 2;
+    if (a !== 0) T0 = T0 - b / (2 * a);
+  }
+
+  let freq = sampleRate / T0;
+  let conf = maxval / c[0];
+  return { freq, conf };
+}
+
+function freqToNote(freq) {
+  const noteNum = 69 + 12 * Math.log2(freq / 440);
+  const rounded = Math.round(noteNum);
+  const midi = Math.max(0, Math.min(127, rounded));
+  const note = NOTE_NAMES[midi % 12];
+  const octave = Math.floor(midi / 12) - 1;
+  return { name: `${note}${octave}`, midi, pc: midi % 12, cents: Math.round((noteNum - rounded) * 100) };
+}
+
+function updatePitchClass(pc, weight = 1) {
+  pitchClassBuffer[pc] += weight;
+  // Decay suave
+  for(let i=0; i<12; i++) pitchClassBuffer[i] *= 0.98;
+}
+
+function detectChord() {
+  const buf = Array.from(pitchClassBuffer);
+  const sum = buf.reduce((a,b)=>a+b, 0) || 1;
+  const norm = buf.map(v => v/sum);
+
+  let best = { name: '--', score: 0 };
+  for(let root=0; root<12; root++) {
+    for(const [type, template] of Object.entries(CHORD_TEMPLATES)) {
+      let score = 0;
+      for(let i=0; i<12; i++) {
+        const idx = (i + root) % 12;
+        score += norm[idx] * (template[i] ? 1 : 0.1);
+      }
+      if(score > best.score) {
+        best = { name: `${NOTE_NAMES[root]}${type}`, score };
+      }
+    }
+  }
+  return best.score > 0.15 ? best.name : '--';
+}
+
+function estimateKey() {
+  const buf = Array.from(pitchClassBuffer);
+  const max = Math.max(...buf) || 1;
+  const norm = buf.map(v => v/max);
+
+  let best = { name: '--', score: -Infinity };
+  for(let root=0; root<12; root++) {
+    let majScore = 0, minScore = 0;
+    for(let i=0; i<12; i++) {
+      const idx = (i + root) % 12;
+      majScore += norm[i] * KRUMHANSL_MAJOR[idx];
+      minScore += norm[i] * KRUMHANSL_MINOR[idx];
+    }
+    const s = Math.max(majScore, minScore);
+    const suffix = majScore > minScore ? 'Maj' : 'min';
+    if(s > best.score) best = { name: `${NOTE_NAMES[root]} ${suffix}`, score: s };
+  }
+  return best.score > 0.2 ? best.name : '--';
+}
+
+// Detecção simplificada de BPM via energia de onset
+function detectBPM(rms) {
+  const now = performance.now();
+  if(rms > 0.08 && now - lastOnset > 200) { // Threshold dinâmico simplificado
+    onsetTimes.push(now);
+    lastOnset = now;
+    if(onsetTimes.length > 2) {
+      // Mantém apenas últimos 10 onsets
+      if(onsetTimes.length > 10) onsetTimes.shift();
+      // Autocorrelação de IQR
+      let intervals = [];
+      for(let i=1; i<onsetTimes.length; i++) intervals.push(onsetTimes[i] - onsetTimes[i-1]);
+      const avg = intervals.reduce((a,b)=>a+b)/intervals.length;
+      const bpm = Math.round(60000 / avg);
+      return bpm >= 60 && bpm <= 200 ? bpm : null;
+    }
+  }
+  return null;
+}
+
+// --- UI & LOOP ---
+
+function drawSpectrum() {
+  const w = UI.canvas.width, h = UI.canvas.height;
+  ctx.fillStyle = 'rgba(0,0,0,0.2)';
+  ctx.fillRect(0,0,w,h);
+
+  analyser.getByteFrequencyData(dataArrayByte);
+  const barWidth = (w / bufferLength) * 2.5;
+  let x = 0;
+
+  for(let i=0; i<bufferLength; i++) {
+    const barHeight = (dataArrayByte[i] / 255) * h;
+    const hue = 240 + (i/bufferLength) * 60;
+    ctx.fillStyle = `hsl(${hue}, 70%, 60%)`;
+    ctx.fillRect(x, h - barHeight, barWidth - 1, barHeight);
+    x += barWidth;
+  }
+}
+
+function updateUI(note, freq, conf, chord, key, bpm, rms) {
+  UI.note.textContent = note || '--';
+  UI.freq.textContent = freq ? `${freq.toFixed(1)} Hz` : '--';
+  UI.chord.textContent = chord;
+  UI.key.textContent = key;
+  UI.bpm.textContent = bpm ? `${bpm} BPM` : '--';
+  UI.conf.textContent = `${Math.round(conf * 100)}%`;
+  UI.meter.style.width = `${Math.min(100, rms * 500)}%`;
+}
+
+function processAudio() {
+  if(!isRunning) return;
+
+  analyser.getFloatTimeDomainData(dataArrayFloat);
+  const { freq, conf } = autoCorrelate(dataArrayFloat, audioCtx.sampleRate);
+  const rms = Math.sqrt(dataArrayFloat.reduce((a,v)=>a+v*v,0)/dataArrayFloat.length);
+
+  let noteObj = null;
+  if(conf > 0.4 && freq > 60 && freq < 1200) {
+    currentFreq = freq;
+    noteObj = freqToNote(freq);
+    updatePitchClass(noteObj.pc, conf);
+    
+    if(frameCount % 30 === 0) { // Atualiza história ~2x/s
+      noteHistory.push({ time: new Date().toISOString(), note: noteObj.name, freq: Math.round(freq), chord: UI.chord.textContent });
+      const div = document.createElement('div');
+      div.textContent = `[${noteHistory.length}] ${noteObj.name} | ${Math.round(freq)}Hz`;
+      UI.history.prepend(div);
+      if(UI.history.children.length > 50) UI.history.removeChild(UI.history.lastChild);
+    }
+  }
+
+  const chord = detectChord();
+  const key = estimateKey();
+  const bpm = detectBPM(rms);
+
+  updateUI(noteObj?.name, currentFreq, conf, chord, key, bpm, rms);
+  drawSpectrum();
+
+  frameCount++;
+  rafId = requestAnimationFrame(processAudio);
+}
+
+async function initAudio() {
+  try {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } });
+    source = audioCtx.createMediaStreamSource(stream);
+    analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 4096;
+    analyser.smoothingTimeConstant = 0.8;
+    bufferLength = analyser.frequencyBinCount;
+    dataArrayFloat = new Float32Array(analyser.fftSize);
+    dataArrayByte = new Uint8Array(bufferLength);
+
+    source.connect(analyser);
+    isRunning = true;
+    UI.startBtn.textContent = '⏹ Parar Análise';
+    UI.exportBtn.disabled = false;
+    UI.status.textContent = '🟢 Analisando áudio em tempo real...';
+    processAudio();
+  } catch (err) {
+    console.error(err);
+    UI.status.textContent = `❌ Erro ao acessar microfone: ${err.message}`;
+  }
+}
+
+function stopAudio() {
+  isRunning = false;
+  if(source) source.disconnect();
+  if(audioCtx) audioCtx.close();
+  cancelAnimationFrame(rafId);
+  UI.startBtn.textContent = '🎤 Iniciar Microfone';
+  UI.status.textContent = '⏹ Análise pausada.';
+}
+
+UI.startBtn.addEventListener('click', () => {
+  if(!isRunning) initAudio();
+  else stopAudio();
+});
+
+UI.exportBtn.addEventListener('click', () => {
+  const data = {
+    app: 'Music House',
+    exportDate: new Date().toISOString(),
+    totalNotes: noteHistory.length,
+    notes: noteHistory,
+    summary: {
+      lastChord: UI.chord.textContent,
+      lastKey: UI.key.textContent,
+      lastBpm: UI.bpm.textContent
+    }
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `music-house-analysis-${Date.now()}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+});
+</script>
 </body>
 </html>
