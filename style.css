@@ -1,25 +1,182 @@
-    body {
+/* ===== BASE ===== */
+body{
   margin:0;
-  background: url('bg.jpg') no-repeat center center;
-  background-size: cover;
-  overflow:hidden;                                                                                                               {
-  background: #000;
-  color: #00ffcc;
-  font-family: monospace;
-  text-align: center;
-  padding-top: 100px;
+  overflow:hidden;
+
+  font-family:Segoe UI,sans-serif;
+  text-align:center;
+  color:white;
+
+  background:url("bg.jpg") no-repeat center center;
+  background-size:cover;
 }
 
-button {
-  padding: 10px 20px;
-  background: #00ffcc;
-  border: none;
-  cursor: pointer;
+
+/* ===== PARTICULAS ===== */
+#particles{
+  position:fixed;
+  inset:0;
+  z-index:0;
 }
 
-#resultado {
-  margin-top: 20px;
-  border: 1px solid #00ffcc;
-  padding: 15px;
-  display: inline-block;
+
+/* ===== LUZ DA PEDRA ===== */
+.crystal-light{
+  position:fixed;
+
+  left:50%;
+  top:42%;
+
+  transform:translate(-50%,-50%);
+
+  width:120px;
+  height:220px;
+
+  pointer-events:none;
+
+  z-index:1;
+
+  background:
+    radial-gradient(
+      ellipse at center,
+      rgba(180,0,255,.9) 0%,
+      rgba(180,0,255,.35) 35%,
+      transparent 70%
+    );
+
+  filter:blur(18px);
+
+  animation:pulseCrystal 2.2s infinite ease-in-out;
+}
+
+@keyframes pulseCrystal{
+
+  0%{
+    opacity:.4;
+
+    transform:
+      translate(-50%,-50%)
+      scale(.9);
+  }
+
+  50%{
+    opacity:1;
+
+    transform:
+      translate(-50%,-50%)
+      scale(1.25);
+  }
+
+  100%{
+    opacity:.4;
+
+    transform:
+      translate(-50%,-50%)
+      scale(.9);
+  }
+
+}
+
+
+/* ===== UI ===== */
+.container{
+  position:relative;
+  z-index:3;
+
+  margin-top:80px;
+}
+
+
+h1{
+  margin-bottom:20px;
+
+  text-shadow:
+    0 0 10px #b400ff,
+    0 0 25px #b400ff;
+}
+
+
+#status{
+  font-size:16px;
+  margin-bottom:20px;
+}
+
+
+/* ===== BOTAO ===== */
+button{
+  padding:12px 30px;
+
+  border:1px solid #b400ff;
+  border-radius:8px;
+
+  background:transparent;
+
+  color:#b400ff;
+
+  cursor:pointer;
+
+  transition:.3s;
+}
+
+button:hover{
+
+  box-shadow:
+    0 0 15px #b400ff;
+
+  transform:scale(1.05);
+}
+
+
+/* ===== CARD ===== */
+.card{
+
+  margin:30px auto;
+
+  width:260px;
+
+  padding:20px;
+
+  border-radius:12px;
+
+  background:
+    rgba(0,0,0,.55);
+
+  backdrop-filter:blur(8px);
+
+  border:
+    1px solid rgba(180,0,255,.35);
+
+  opacity:0;
+
+  transform:scale(.8);
+
+  transition:.5s;
+}
+
+
+.card.show{
+  opacity:1;
+  transform:scale(1);
+}
+
+
+/* ===== RARIDADE ===== */
+.comum{
+  border-color:#777;
+}
+
+
+.raro{
+  border-color:#b400ff;
+
+  box-shadow:
+    0 0 15px #b400ff;
+}
+
+
+.lendario{
+  border-color:gold;
+
+  box-shadow:
+    0 0 20px gold;
 }
