@@ -1,55 +1,71 @@
+// ===== CANVAS =====
 const canvas = document.getElementById("particles");
 const ctx = canvas.getContext("2d");
 
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+function resizeCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+resizeCanvas();
+window.addEventListener("resize", resizeCanvas);
 
-let mouse = { x: canvas.width/2, y: canvas.height/2 };
-
-window.addEventListener("mousemove", e => {
-  mouse.x = e.clientX;
-  mouse.y = e.clientY;
-});
-
-/* PARTICULAS QUE SEGUEM O MOUSE */
+// ===== PARTICULAS ROXAS (BASE DA PEDRA) =====
 let particles = [];
 
-for(let i=0;i<120;i++){
-  particles.push({
-    x: Math.random()*canvas.width,
-    y: Math.random()*canvas.height,
-    vx: 0,
-    vy: 0
-  });
+function createParticle() {
+  return {
+    x: canvas.width / 2 + (Math.random() * 120 - 60),
+    y: canvas.height - 120,
+    vx: (Math.random() - 0.5) * 0.4,
+    vy: -Math.random() * 2 - 1,
+    size: Math.random() * 2 + 1,
+    alpha: 1
+  };
 }
 
-function loop(){
-  ctx.clearRect(0,0,canvas.width,canvas.height);
+function initParticles() {
+  particles = [];
+  for (let i = 0; i < 150; i++) {
+    particles.push(createParticle());
+  }
+}
 
-  particles.forEach(p=>{
-    let dx = mouse.x - p.x;
-    let dy = mouse.y - p.y;
+initParticles();
 
-    p.vx += dx * 0.0005;
-    p.vy += dy * 0.0005;
+// ===== LOOP =====
+function loop() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+  particles.forEach((p, i) => {
     p.x += p.vx;
     p.y += p.vy;
+    p.alpha -= 0.008;
 
-    ctx.fillStyle = "#00ffe1";
-    ctx.fillRect(p.x, p.y, 2, 2);
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+
+    ctx.fillStyle = `rgba(180, 0, 255, ${p.alpha})`;
+    ctx.shadowColor = "#b400ff";
+    ctx.shadowBlur = 20;
+
+    ctx.fill();
+
+    if (p.alpha <= 0) {
+      particles[i] = createParticle();
+    }
   });
 
   requestAnimationFrame(loop);
 }
+
 loop();
 
-/* HASH REAL (SIMPLES) */
+// ===== HASH =====
 function gerarHash() {
   return Math.random().toString(36).substring(2, 10);
 }
 
-/* TEXTO DECODIFICANDO */
+// ===== TEXTO DECODIFICANDO =====
 function decodeText(element, finalText) {
   let chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890@#$%";
   let iterations = 0;
@@ -58,12 +74,12 @@ function decodeText(element, finalText) {
     element.innerText = finalText
       .split("")
       .map((letter, index) => {
-        if(index < iterations) return finalText[index];
-        return chars[Math.floor(Math.random()*chars.length)];
+        if (index < iterations) return finalText[index];
+        return chars[Math.floor(Math.random() * chars.length)];
       })
       .join("");
 
-    if(iterations >= finalText.length){
+    if (iterations >= finalText.length) {
       clearInterval(interval);
     }
 
@@ -71,30 +87,28 @@ function decodeText(element, finalText) {
   }, 40);
 }
 
-/* GERAR ALMA EVOLUÍDO */
+// ===== GERAR ALMA =====
 function gerarAlma() {
-  const nomes = ["Aether","Nyx","Vortex","Orion","Eclipse"];
-  const tipos = ["Arcano","Caótico","Luminar","Sombrio"];
-
-  const hash = gerarHash();
+  const nomes = ["Aether", "Nyx", "Vortex", "Orion", "Eclipse"];
+  const tipos = ["Arcano", "Caótico", "Luminar", "Sombrio"];
 
   return {
-    nome: nomes[Math.floor(Math.random()*nomes.length)],
-    tipo: tipos[Math.floor(Math.random()*tipos.length)],
-    nivel: Math.floor(Math.random()*100),
-    energia: Math.floor(Math.random()*1000),
-    hash: hash
+    nome: nomes[Math.floor(Math.random() * nomes.length)],
+    tipo: tipos[Math.floor(Math.random() * tipos.length)],
+    nivel: Math.floor(Math.random() * 100),
+    energia: Math.floor(Math.random() * 1000),
+    hash: gerarHash()
   };
 }
 
-/* EXECUÇÃO */
-function gerar(){
+// ===== EXECUÇÃO =====
+function gerar() {
   const status = document.getElementById("status");
   const card = document.getElementById("card");
 
-  status.innerText = "Processando núcleo...";
+  status.innerText = "Canalizando energia...";
 
-  setTimeout(()=>{
+  setTimeout(() => {
     const alma = gerarAlma();
 
     card.innerHTML = `
@@ -107,6 +121,6 @@ function gerar(){
 
     decodeText(document.getElementById("nome"), alma.nome);
 
-    status.innerText = "Entidade criada";
-  },1000);
-    }
+    status.innerText = "Entidade materializada";
+  }, 1200);
+               }
