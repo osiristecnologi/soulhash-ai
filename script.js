@@ -22,7 +22,7 @@ function createParticle() {
 
   // centro da base da pedra (mobile)
   const baseX = canvas.width * 0.50;
-  const baseY = canvas.height * 0.58;
+  const baseY = canvas.height * 0.64;
 
   return {
     x: baseX + (Math.random() * 80 - 40),
