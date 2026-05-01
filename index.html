@@ -1,59 +1,125 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <title>SoulHash AI</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<title>SoulHash AI</title>
+
+<style>
+body {
+  background: radial-gradient(circle, #050505, #000);
+  color: #00ffcc;
+  font-family: 'Segoe UI', sans-serif;
+  text-align: center;
+  overflow: hidden;
+}
+
+/* ORB */
+#orb {
+  width: 180px;
+  height: 180px;
+  margin: 100px auto 30px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #00ffcc, transparent);
+  animation: pulse 2s infinite;
+  box-shadow: 0 0 40px #00ffcc;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+/* BOTÃO */
+button {
+  padding: 12px 30px;
+  background: transparent;
+  border: 1px solid #00ffcc;
+  color: #00ffcc;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+button:hover {
+  background: #00ffcc;
+  color: black;
+}
+
+/* RESULTADO */
+#resultado {
+  margin-top: 30px;
+  opacity: 0;
+  transform: scale(0.8);
+  transition: 0.5s;
+}
+
+.mostrar {
+  opacity: 1 !important;
+  transform: scale(1) !important;
+}
+
+/* TEXTO */
+#status {
+  height: 30px;
+  margin-bottom: 20px;
+}
+</style>
+
 </head>
 <body>
 
-  <h1>SOULHASH AI</h1>
+<h1>SOULHASH AI</h1>
 
-  <div id="painel">
-    <p id="status">Clique para gerar sua alma...</p>
+<div id="orb"></div>
 
-    <button onclick="gerar()">GERAR ALMA</button>
+<p id="status">Clique para iniciar análise...</p>
 
-    <div id="resultado" style="margin-top:20px;"></div>
-  </div>
+<button onclick="gerar()">INICIAR</button>
 
-  <script src="script.js"></script>
+<div id="resultado"></div>
 
-  <script>
-    function gerar() {
-      const status = document.getElementById("status");
-      const resultado = document.getElementById("resultado");
+<script src="script.js"></script>
 
-      const etapas = [
-        "Escaneando consciência...",
-        "Sincronizando frequência...",
-        "Calculando SoulHash...",
-        "Gerando alma..."
-      ];
+<script>
+function gerar() {
+  const status = document.getElementById("status");
+  const resultado = document.getElementById("resultado");
 
-      let i = 0;
+  resultado.classList.remove("mostrar");
 
-      const intervalo = setInterval(() => {
-        status.innerText = etapas[i];
-        i++;
+  const etapas = [
+    "Lendo sua energia...",
+    "Quebrando padrão da alma...",
+    "Calculando hash...",
+    "Materializando essência..."
+  ];
 
-        if (i >= etapas.length) {
-          clearInterval(intervalo);
+  let i = 0;
 
-          setTimeout(() => {
-            const alma = gerarAlma();
+  const loop = setInterval(() => {
+    status.innerText = etapas[i];
+    i++;
 
-            resultado.innerHTML = `
-              <h2>${alma.nome}</h2>
-              <p>Tipo: ${alma.tipo}</p>
-              <p>Nível: ${alma.nivel}</p>
-              <p>Energia: ${alma.energia}</p>
-            `;
-          }, 800);
-        }
-      }, 700);
+    if (i >= etapas.length) {
+      clearInterval(loop);
+
+      setTimeout(() => {
+        const alma = gerarAlma();
+
+        resultado.innerHTML = `
+          <h2>${alma.nome}</h2>
+          <p>Tipo: ${alma.tipo}</p>
+          <p>Nível: ${alma.nivel}</p>
+          <p>Energia: ${alma.energia}</p>
+        `;
+
+        resultado.classList.add("mostrar");
+        status.innerText = "Alma materializada";
+      }, 800);
     }
-  </script>
+  }, 700);
+}
+</script>
 
 </body>
 </html>
