@@ -1,1 +1,59 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>SoulHash AI</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
 
+  <h1>SOULHASH AI</h1>
+
+  <div id="painel">
+    <p id="status">Clique para gerar sua alma...</p>
+
+    <button onclick="gerar()">GERAR ALMA</button>
+
+    <div id="resultado" style="margin-top:20px;"></div>
+  </div>
+
+  <script src="script.js"></script>
+
+  <script>
+    function gerar() {
+      const status = document.getElementById("status");
+      const resultado = document.getElementById("resultado");
+
+      const etapas = [
+        "Escaneando consciência...",
+        "Sincronizando frequência...",
+        "Calculando SoulHash...",
+        "Gerando alma..."
+      ];
+
+      let i = 0;
+
+      const intervalo = setInterval(() => {
+        status.innerText = etapas[i];
+        i++;
+
+        if (i >= etapas.length) {
+          clearInterval(intervalo);
+
+          setTimeout(() => {
+            const alma = gerarAlma();
+
+            resultado.innerHTML = `
+              <h2>${alma.nome}</h2>
+              <p>Tipo: ${alma.tipo}</p>
+              <p>Nível: ${alma.nivel}</p>
+              <p>Energia: ${alma.energia}</p>
+            `;
+          }, 800);
+        }
+      }, 700);
+    }
+  </script>
+
+</body>
+</html>
