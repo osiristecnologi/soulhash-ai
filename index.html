@@ -5,34 +5,79 @@
 <title>SoulHash AI</title>
 
 <style>
-body {
+body{
   margin:0;
-  background: url('bg.jpg') no-repeat center center;
-  background-size: cover;
-  color:#ffffff;
-  font-family: 'Segoe UI', sans-serif;
-  text-align:center;
   overflow:hidden;
+  font-family:Segoe UI,sans-serif;
+  color:white;
+  text-align:center;
+
+  background:url("bg.jpg") no-repeat center center;
+  background-size:cover;
 }
 
-/* CANVAS */
-canvas {
+/* canvas */
+#particles{
   position:fixed;
-  top:0;
-  left:0;
+  inset:0;
   z-index:0;
 }
 
-/* CONTAINER */
-.container {
+/* container */
+.container{
   position:relative;
-  z-index:1;
+  z-index:3;
   margin-top:80px;
 }
 
-/* BOTÃO */
-button {
-  margin-top:20px;
+/* LUZ DA PEDRA */
+.crystal-light{
+  position:fixed;
+
+  /* ajuste fino da posição da pedra no mobile */
+  left:50%;
+  top:42%;
+
+  transform:translate(-50%,-50%);
+
+  width:120px;
+  height:220px;
+
+  pointer-events:none;
+  z-index:1;
+
+  background:
+    radial-gradient(
+      ellipse at center,
+      rgba(180,0,255,.9) 0%,
+      rgba(180,0,255,.35) 35%,
+      transparent 70%
+    );
+
+  filter:blur(18px);
+
+  animation:pulseCrystal 2.2s infinite ease-in-out;
+}
+
+@keyframes pulseCrystal{
+  0%{
+    opacity:.4;
+    transform:translate(-50%,-50%) scale(.9);
+  }
+
+  50%{
+    opacity:1;
+    transform:translate(-50%,-50%) scale(1.25);
+  }
+
+  100%{
+    opacity:.4;
+    transform:translate(-50%,-50%) scale(.9);
+  }
+}
+
+/* botão */
+button{
   padding:12px 30px;
   border:1px solid #b400ff;
   background:transparent;
@@ -40,33 +85,24 @@ button {
   cursor:pointer;
 }
 
-button:hover {
-  background:#b400ff;
-  color:#000;
-}
-
-/* CARD */
-.card {
+.card{
   margin:30px auto;
   width:260px;
   padding:20px;
+
+  background:rgba(0,0,0,.5);
+  border:1px solid rgba(180,0,255,.4);
   border-radius:12px;
-  background: rgba(0,0,0,0.6);
-  border:1px solid rgba(180,0,255,0.5);
-  transform: scale(0.8);
+
   opacity:0;
-  transition:0.5s;
+  transform:scale(.8);
+  transition:.5s;
 }
 
-.card.show {
-  transform: scale(1);
+.card.show{
   opacity:1;
+  transform:scale(1);
 }
-
-/* RARIDADE */
-.comum { border-color: #888; }
-.raro { border-color: #b400ff; }
-.lendario { border-color: gold; box-shadow:0 0 20px gold; }
 </style>
 </head>
 
@@ -74,14 +110,23 @@ button:hover {
 
 <canvas id="particles"></canvas>
 
+<!-- luz da pedra -->
+<div class="crystal-light"></div>
+
 <div class="container">
+
   <h1>SOULHASH AI</h1>
 
-  <p id="status">Clique para iniciar análise</p>
+  <p id="status">
+    Clique para iniciar análise
+  </p>
 
-  <button onclick="gerar()">INICIAR</button>
+  <button onclick="gerar()">
+    INICIAR
+  </button>
 
   <div id="card" class="card"></div>
+
 </div>
 
 <script src="script.js"></script>
